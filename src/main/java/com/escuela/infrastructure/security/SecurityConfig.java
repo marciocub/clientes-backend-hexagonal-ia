@@ -20,7 +20,7 @@ import java.util.List;
  * - CSRF deshabilitado (no hay estado de sesion que proteger).
  * - CORS habilitado para http://localhost:3000.
  * - Rutas PUBLICAS: POST /api/usuarios/registro, POST /api/usuarios/login, GET /api/usuarios/ping.
- * - Rutas PROTEGIDAS: todas las demas (/api/alumnos/**) requieren token valido.
+ * - Rutas PROTEGIDAS: todas las demas (/api/clientes/**) requieren token valido.
  * - Sin token -&gt; 403 (entry point por defecto de Spring Security);
  *   token invalido/expirado -&gt; 401 (lo resuelve el JwtAuthenticationFilter).
  */

@@ -1,49 +1,22 @@
-package com.escuela.infrastructure.out.db;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
+package com.escuela.application.dto;
 
 import java.time.LocalDateTime;
 
 /**
- * Unica clase de alumno con anotaciones JPA (adaptador de salida a BD).
- * El modelo de dominio (domain/model/Alumno) permanece puro.
- * Tabla: alumnos (email unico).
+ * DTO de SALIDA con los datos de un cliente.
+ * Nunca expone informacion sensible (no hay contrasenas en clientes).
  */
-@Entity
-@Table(name = "alumnos",
-        uniqueConstraints = @UniqueConstraint(name = "uk_alumno_email", columnNames = "email"))
-public class AlumnoJpaEntity {
+public class ClienteDtoResponse {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(name = "nombre", nullable = false, length = 100)
     private String nombre;
-
-    @Column(name = "apellido", nullable = false, length = 100)
     private String apellido;
-
-    @Column(name = "email", nullable = false, length = 100)
     private String email;
-
-    @Column(name = "telefono", length = 20)
     private String telefono;
-
-    /** ACTIVO / INACTIVO (string en la tabla, enum en el dominio). */
-    @Column(name = "estado", nullable = false, length = 20)
     private String estado;
-
-    @Column(name = "fecha_inscripcion", nullable = false)
     private LocalDateTime fechaInscripcion;
 
-    public AlumnoJpaEntity() {
+    public ClienteDtoResponse() {
     }
 
     public Long getId() {

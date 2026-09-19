@@ -1,22 +1,33 @@
-package com.escuela.application.dto;
+package com.escuela.domain.model;
 
 import java.time.LocalDateTime;
 
 /**
- * DTO de SALIDA con los datos de un alumno.
- * Nunca expone informacion sensible (no hay contrasenas en alumnos).
+ * Modelo de negocio puro de un Cliente.
+ *
+ * Regla hexagonal: SIN anotaciones JPA (@Entity, @Table, @Column),
+ * SIN imports de Spring ni Lombok. Solo negocio.
  */
-public class AlumnoDtoResponse {
+public class Cliente {
+
+    /** Estados posibles de un cliente. */
+    public enum Estado {
+        ACTIVO,
+        INACTIVO
+    }
 
     private Long id;
     private String nombre;
     private String apellido;
     private String email;
     private String telefono;
-    private String estado;
+    private Estado estado;
     private LocalDateTime fechaInscripcion;
 
-    public AlumnoDtoResponse() {
+    public Cliente() {
+        // Defaults de negocio: estado ACTIVO y fecha de inscripcion actual
+        this.estado = Estado.ACTIVO;
+        this.fechaInscripcion = LocalDateTime.now();
     }
 
     public Long getId() {
@@ -59,11 +70,11 @@ public class AlumnoDtoResponse {
         this.telefono = telefono;
     }
 
-    public String getEstado() {
+    public Estado getEstado() {
         return estado;
     }
 
-    public void setEstado(String estado) {
+    public void setEstado(Estado estado) {
         this.estado = estado;
     }
 

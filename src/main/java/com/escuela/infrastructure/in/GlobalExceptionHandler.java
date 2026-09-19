@@ -1,6 +1,6 @@
 package com.escuela.infrastructure.in;
 
-import com.escuela.domain.exception.AlumnoNoEncontradoException;
+import com.escuela.domain.exception.ClienteNoEncontradoException;
 import com.escuela.domain.exception.CredencialesInvalidasException;
 import com.escuela.domain.exception.EmailDuplicadoException;
 import org.slf4j.Logger;
@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
  * Adaptador de entrada que mapea excepciones de dominio a codigos HTTP:
  * - MethodArgumentNotValidException -&gt; 400 Bad Request
  * - CredencialesInvalidasException   -&gt; 401 Unauthorized
- * - AlumnoNoEncontradoException      -&gt; 404 Not Found
+ * - ClienteNoEncontradoException      -&gt; 404 Not Found
  * - EmailDuplicadoException          -&gt; 409 Conflict
  * - IllegalArgumentException         -&gt; 400 Bad Request (ej. estado invalido)
  */
@@ -60,8 +60,8 @@ public class GlobalExceptionHandler {
                 .body(new ErrorRespuesta(401, "Unauthorized", ex.getMessage(), LocalDateTime.now()));
     }
 
-    @ExceptionHandler(AlumnoNoEncontradoException.class)
-    public ResponseEntity<ErrorRespuesta> manejarAlumnoNoEncontrado(AlumnoNoEncontradoException ex) {
+    @ExceptionHandler(ClienteNoEncontradoException.class)
+    public ResponseEntity<ErrorRespuesta> manejarClienteNoEncontrado(ClienteNoEncontradoException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new ErrorRespuesta(404, "Not Found", ex.getMessage(), LocalDateTime.now()));
     }

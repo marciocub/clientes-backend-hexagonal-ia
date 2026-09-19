@@ -5,10 +5,10 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 /**
- * DTO de ENTRADA para crear / actualizar un alumno.
- * Atraviesa el puerto de entrada (AlumnoUseCase): nunca viaja la entidad de dominio.
+ * DTO de ENTRADA para crear / actualizar un cliente.
+ * Atraviesa el puerto de entrada (ClienteUseCase): nunca viaja la entidad de dominio.
  */
-public class AlumnoDTO {
+public class ClienteDTO {
 
     @NotBlank(message = "El nombre es obligatorio")
     @Size(max = 100, message = "El nombre no puede superar los 100 caracteres")
@@ -29,7 +29,7 @@ public class AlumnoDTO {
     /** Opcional: ACTIVO / INACTIVO. Si llega vacio se usa ACTIVO por defecto. */
     private String estado;
 
-    public AlumnoDTO() {
+    public ClienteDTO() {
     }
 
     public String getNombre() {
