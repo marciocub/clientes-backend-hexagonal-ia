@@ -1,0 +1,35 @@
+# ============================================
+# alumnos-backend-hexagonal-ia — .gitignore
+# ============================================
+
+# --- Build Maven ---
+/target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# --- IDEs (IntelliJ, VS Code) ---
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+
+# --- Eclipse ---
+.classpath
+.project
+.settings/
+.factorypath
+.apt_generated
+.springBeans
+
+# --- Logs (cubre backend-run.log) ---
+*.log
+logs/
+
+# --- Sistema operativo ---
+.DS_Store
+Thumbs.db
+
+# --- Configuración local sensible (si algún día se crea) ---
+.env
+application-local.properties
+
