@@ -8,6 +8,7 @@
 // ==========================================================================
 // package com.escuela.application.dto;
 //
+<<<<<<< HEAD
 
 import java.math.BigDecimal;
 
@@ -57,3 +58,9 @@ public class CuentaDTO {
 		return moneda;
 	}
 }
+=======
+// public class CuentaDTO {
+//
+// }
+//
+>>>>>>> 473046613a86a284a12f04fa082ce9c64fdd6e36
