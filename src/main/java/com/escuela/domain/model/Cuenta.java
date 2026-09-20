@@ -46,6 +46,5 @@ public class Cuenta {
 	}
 	public Moneda getMoneda() {
 		return moneda;
-	}
-    
+	}    
 }

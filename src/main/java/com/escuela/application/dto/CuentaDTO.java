@@ -6,9 +6,7 @@
 // CuentaJpaEntity / CuentaRepository / CuentaAdapter.
 // Descomentar este bloque cuando el modulo Cuenta este completo.
 // ==========================================================================
-// package com.escuela.application.dto;
-//
-<<<<<<< HEAD
+ package com.escuela.application.dto;
 
 import java.math.BigDecimal;
 
@@ -16,8 +14,8 @@ import com.escuela.domain.Enum.EstadoCuenta;
 import com.escuela.domain.Enum.Moneda;
 
 public class CuentaDTO {
-	
-    private Long id;
+	//nova por que no mandas el id cuendo es nuevo
+    //private Long id;
     private String numeroCuenta;
     private Long clienteId;
     private BigDecimal saldo;
@@ -39,14 +37,7 @@ public class CuentaDTO {
 	}
 	public void setEstado(EstadoCuenta estado) {
 		this.estado = estado;
-	}
-	public Long getId() {
-		return id;
-	}
-	
-	public void setId(Long id) {
-	     this.id = id;
-	}
+	}	
 	
 	public String getNumeroCuenta() {
 		return numeroCuenta;
@@ -58,9 +49,3 @@ public class CuentaDTO {
 		return moneda;
 	}
 }
-=======
-// public class CuentaDTO {
-//
-// }
-//
->>>>>>> 473046613a86a284a12f04fa082ce9c64fdd6e36
