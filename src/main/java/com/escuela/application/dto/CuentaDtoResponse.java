@@ -6,8 +6,11 @@
 // CuentaJpaEntity / CuentaRepository / CuentaAdapter.
 // Descomentar este bloque cuando el modulo Cuenta este completo.
 // ==========================================================================
- package com.escuela.application.port.out;
+// package com.escuela.application.dto;
+//
+package com;
 
- public class CuentaDtoResponse {
+public class CuentaDtoResponse {
+	
 
- }
+}

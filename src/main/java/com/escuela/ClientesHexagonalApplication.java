@@ -11,9 +11,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * cubra todo el paquete com.escuela.
  */
 @SpringBootApplication
-public class AlumnosHexagonalApplication {
+public class ClientesHexagonalApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(AlumnosHexagonalApplication.class, args);
+        SpringApplication.run(ClientesHexagonalApplication.class, args);
     }
 }

@@ -1,21 +1,12 @@
-// ==========================================================================
-// MODULO CUENTA - CLASE EN CONSTRUCCION (COMENTADA SEGUN INSTRUCCION)
-// Motivo: no compila - tipos inexistentes (CuetanDtoResponse,
-// CuentaResponseDTO, CuentaResponseDto, Lista) y sintaxis invalida
-// en CuentaController; ademas faltan CuentaService / CuentaOutPort /
-// CuentaJpaEntity / CuentaRepository / CuentaAdapter.
-// Descomentar este bloque cuando el modulo Cuenta este completo.
-// ==========================================================================
-// package com.escuela.application.dto;
-//
+package com.escuela.domain.model;
 
 import java.math.BigDecimal;
 
 import com.escuela.domain.Enum.EstadoCuenta;
 import com.escuela.domain.Enum.Moneda;
 
-public class CuentaDTO {
-	
+public class Cuenta {
+
     private Long id;
     private String numeroCuenta;
     private Long clienteId;
@@ -23,8 +14,8 @@ public class CuentaDTO {
     private Moneda moneda;
     private EstadoCuenta estado;
     
-    public CuentaDTO(){
-    	
+    public Cuenta(){
+    	this.estado = EstadoCuenta.INACTIVO;
     }
     
 	public BigDecimal getSaldo() {
@@ -56,4 +47,5 @@ public class CuentaDTO {
 	public Moneda getMoneda() {
 		return moneda;
 	}
+    
 }

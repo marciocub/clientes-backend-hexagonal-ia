@@ -12,10 +12,10 @@
     </parent>
 
     <groupId>com.escuela</groupId>
-    <artifactId>alumnos-hexagonal</artifactId>
+    <artifactId>clientes-hexagonal</artifactId>
     <version>1.0.0</version>
-    <name>alumnos-hexagonal</name>
-    <description>Backend ABM de Alumnos con autenticacion JWT y Arquitectura Hexagonal (Puertos y Adaptadores)</description>
+    <name>clientes-hexagonal</name>
+    <description>Backend ABM de Clientes con autenticacion JWT y Arquitectura Hexagonal (Puertos y Adaptadores)</description>
 
     <properties>
         <java.version>21</java.version>
