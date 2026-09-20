@@ -1,36 +1,32 @@
-		 /*
- MODULO CUENTA - CLASE EN CONSTRUCCION (COMENTADA SEGUN INSTRUCCION)
- Motivo: no compila - tipos inexistentes (CuetanDtoResponse,
- CuentaResponseDTO, CuentaResponseDto, Lista) y sintaxis invalida
- en CuentaController; ademas faltan CuentaService / CuentaOutPort /
- CuentaJpaEntity / CuentaRepository / CuentaAdapter.
- Descomentar este bloque cuando el modulo Cuenta este completo.*/
-
- package com.escuela.application.port.in;
+package com.escuela.application.port.in;
 
 import java.util.List;
 
 import com.escuela.application.dto.CuentaDTO;
 import com.escuela.application.dto.CuentaDtoResponse;
 
- /**
-  * Puerto de ENTRADA: casos de uso del ABM de clientes.
-  * Firman sus metodos con DTOs (entrada/salida), no con entidades de dominio.
-  * El adaptador REST (ClienteController) consume esta interfaz.
-  */
- public interface CuentaUseCase {
+/**
+ * Puerto de ENTRADA: casos de uso del ABM de cuentas.
+ * Firman sus metodos con DTOs (entrada/salida), no con entidades de dominio.
+ * El adaptador REST (CuentaController) consume esta interfaz.
+ */
+public interface CuentaUseCase {
 
- 	void crear(CuentaDTO dto);
+    /** Crea una cuenta nueva (409 si el numero de cuenta esta duplicado). */
+    CuentaDtoResponse crear(CuentaDTO dto);
 
-     /** Obtiene un cliente por id (404 si no existe). */
-     CuentaDtoResponse obtenerPorId(Long id);
+    /** Obtiene una cuenta por id (404 si no existe). */
+    CuentaDtoResponse obtenerPorId(Long id);
 
-     /** Lista todos los clientes. */
-     List<CuentaDtoResponse> listarTodos();
+    /** Lista todas las cuentas. */
+    List<CuentaDtoResponse> listarTodos();
 
-     CuentaDtoResponse actualizar(Long id ,CuentaDTO dto);
+    /** Lista cuentas por estado: ACTIVO / INACTIVO. */
+    List<CuentaDtoResponse> listarPorEstado(String estado);
 
-     void eliminar(Long id);
+    /** Actualiza una cuenta existente (404 si no existe, 409 si el numero queda duplicado). */
+    CuentaDtoResponse actualizar(Long id, CuentaDTO dto);
 
-
- }
+    /** Elimina una cuenta por id (404 si no existe). */
+    void eliminar(Long id);
+}

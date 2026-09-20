@@ -1,10 +1,12 @@
 package com.escuela.infrastructure.mapper;
 
-import com.escuela.domain.model.Cliente;
-import com.escuela.infrastructure.out.db.ClienteJpaEntity;
+import com.escuela.domain.Enum.EstadoCuenta;
+import com.escuela.domain.Enum.Moneda;
+import com.escuela.domain.model.Cuenta;
+import com.escuela.infrastructure.out.db.CuentaJpaEntity;
 
 /**
- * Mapper JPA &lt;-&gt; Dominio para clientes.
+ * Mapper JPA &lt;-&gt; Dominio para cuentas.
  * La entidad de dominio nunca se persiste ni se expone: se convierte a JPA
  * para persistir y desde JPA hacia dominio al leer.
  */
@@ -14,30 +16,25 @@ public final class CuentaJpaMapper {
     }
 
     /** Dominio -&gt; JPA (para guardar). */
-    public static ClienteJpaEntity aEntity(Cliente cliente) {
-        ClienteJpaEntity entity = new ClienteJpaEntity();
-        entity.setId(cliente.getId());
-        entity.setNombre(cliente.getNombre());
-        entity.setApellido(cliente.getApellido());
-        entity.setEmail(cliente.getEmail());
-        entity.setTelefono(cliente.getTelefono());
-        entity.setEstado(cliente.getEstado() != null ? cliente.getEstado().name() : Cliente.Estado.ACTIVO.name());
-        entity.setFechaInscripcion(cliente.getFechaInscripcion());
+    public static CuentaJpaEntity aEntity(Cuenta cuenta) {
+        CuentaJpaEntity entity = new CuentaJpaEntity();
+        entity.setId(cuenta.getId());
+        entity.setNumeroCuenta(cuenta.getNumeroCuenta());
+        entity.setClienteId(cuenta.getClienteId());
+        entity.setSaldo(cuenta.getSaldo());
+        entity.setMoneda(cuenta.getMoneda() != null ? cuenta.getMoneda().name() : Moneda.PESOS.name());
+        entity.setEstado(cuenta.getEstado() != null ? cuenta.getEstado().name() : EstadoCuenta.INACTIVO.name());
         return entity;
     }
 
-    /** JPA -&gt; Dominio (para leer). */
-    public static Cliente aDominio(ClienteJpaEntity entity) {
-        Cliente cliente = new Cliente();
-        cliente.setId(entity.getId());
-        cliente.setNombre(entity.getNombre());
-        cliente.setApellido(entity.getApellido());
-        cliente.setEmail(entity.getEmail());
-        cliente.setTelefono(entity.getTelefono());
-        cliente.setEstado(entity.getEstado() != null
-                ? Cliente.Estado.valueOf(entity.getEstado())
-                : Cliente.Estado.ACTIVO);
-        cliente.setFechaInscripcion(entity.getFechaInscripcion());
-        return cliente;
+    /** JPA -&gt; Dominio (para leer). Usa el constructor completo porque el id del dominio es final. */
+    public static Cuenta aDominio(CuentaJpaEntity entity) {
+        return new Cuenta(
+                entity.getId(),
+                entity.getNumeroCuenta(),
+                entity.getClienteId(),
+                entity.getSaldo(),
+                entity.getMoneda() != null ? Moneda.valueOf(entity.getMoneda()) : Moneda.PESOS,
+                entity.getEstado() != null ? EstadoCuenta.valueOf(entity.getEstado()) : EstadoCuenta.INACTIVO);
     }
 }

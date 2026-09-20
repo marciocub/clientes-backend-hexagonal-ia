@@ -1,116 +1,117 @@
 package com.escuela.application.service;
 
-import com.escuela.application.dto.ClienteDTO;
-import com.escuela.application.dto.ClienteDtoResponse;
-import com.escuela.application.port.in.ClienteUseCase;
-import com.escuela.application.port.out.ClienteOutPort;
-import com.escuela.domain.exception.ClienteNoEncontradoException;
-import com.escuela.domain.exception.EmailDuplicadoException;
-import com.escuela.domain.model.Cliente;
+import com.escuela.application.dto.CuentaDTO;
+import com.escuela.application.dto.CuentaDtoResponse;
+import com.escuela.application.port.in.CuentaUseCase;
+import com.escuela.application.port.out.CuentaOutPort;
+import com.escuela.domain.Enum.EstadoCuenta;
+import com.escuela.domain.exception.CuentaNoEncontradoException;
+import com.escuela.domain.exception.NumeroCuentaDuplicadoException;
+import com.escuela.domain.model.Cuenta;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * Servicio de aplicacion: implementa el puerto de entrada ClienteUseCase.
+ * Servicio de aplicacion: implementa el puerto de entrada CuentaUseCase.
  *
  * Regla hexagonal: SOLO conoce el dominio y sus propios puertos.
- * Inyecta la interfaz ClienteOutPort (puerto de salida), nunca clases
+ * Inyecta la interfaz CuentaOutPort (puerto de salida), nunca clases
  * concretas de infraestructura (JPA, web, seguridad).
  */
 @Service
 public class CuentaService implements CuentaUseCase {
 
-    private final ClienteOutPort clienteOutPort;
+    private final CuentaOutPort cuentaOutPort;
 
-    public CuentaService(ClienteOutPort clienteOutPort) {
-        this.clienteOutPort = clienteOutPort;
+    public CuentaService(CuentaOutPort cuentaOutPort) {
+        this.cuentaOutPort = cuentaOutPort;
     }
 
     @Override
-    public ClienteDtoResponse crear(ClienteDTO dto) {
-        validarEmailDisponible(dto.getEmail(), null);
-        Cliente cliente = new Cliente();
-        cliente.setNombre(dto.getNombre().trim());
-        cliente.setApellido(dto.getApellido().trim());
-        cliente.setEmail(normalizarEmail(dto.getEmail()));
-        cliente.setTelefono(dto.getTelefono());
-        cliente.setEstado(parseEstado(dto.getEstado()));
-        cliente.setFechaInscripcion(LocalDateTime.now());
-        Cliente guardado = clienteOutPort.guardar(cliente);
-        return aResponse(guardado);
+    public CuentaDtoResponse crear(CuentaDTO dto) {
+        validarNumeroCuentaDisponible(dto.getNumeroCuenta(), null);
+        Cuenta cuenta = new Cuenta();
+        cuenta.setNumeroCuenta(dto.getNumeroCuenta().trim());
+        cuenta.setClienteId(dto.getClienteId());
+        cuenta.setSaldo(dto.getSaldo());
+        cuenta.setMoneda(dto.getMoneda());
+        cuenta.setEstado(resolverEstado(dto.getEstado()));
+        Cuenta guardada = cuentaOutPort.guardar(cuenta);
+        return aResponse(guardada);
     }
 
     @Override
-    public ClienteDtoResponse obtenerPorId(Long id) {
-        return aResponse(buscarCliente(id));
+    public CuentaDtoResponse obtenerPorId(Long id) {
+        return aResponse(buscarCuenta(id));
     }
 
     @Override
-    public List<ClienteDtoResponse> listarTodos() {
-        return clienteOutPort.listarTodos().stream()
+    public List<CuentaDtoResponse> listarTodos() {
+        return cuentaOutPort.listarTodos().stream()
                 .map(this::aResponse)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<ClienteDtoResponse> listarPorEstado(String estado) {
-        return clienteOutPort.listarPorEstado(parseEstado(estado)).stream()
+    public List<CuentaDtoResponse> listarPorEstado(String estado) {
+        return cuentaOutPort.listarPorEstado(parseEstado(estado)).stream()
                 .map(this::aResponse)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public ClienteDtoResponse actualizar(Long id, ClienteDTO dto) {
-        Cliente existente = buscarCliente(id);
-        validarEmailDisponible(dto.getEmail(), id);
-        existente.setNombre(dto.getNombre().trim());
-        existente.setApellido(dto.getApellido().trim());
-        existente.setEmail(normalizarEmail(dto.getEmail()));
-        existente.setTelefono(dto.getTelefono());
-        existente.setEstado(parseEstado(dto.getEstado()));
-        // fechaInscripcion se conserva: no se modifica al actualizar
-        return aResponse(clienteOutPort.guardar(existente));
+    public CuentaDtoResponse actualizar(Long id, CuentaDTO dto) {
+        Cuenta existente = buscarCuenta(id);
+        validarNumeroCuentaDisponible(dto.getNumeroCuenta(), id);
+        existente.setNumeroCuenta(dto.getNumeroCuenta().trim());
+        existente.setClienteId(dto.getClienteId());
+        existente.setSaldo(dto.getSaldo());
+        existente.setMoneda(dto.getMoneda());
+        existente.setEstado(resolverEstado(dto.getEstado()));
+        return aResponse(cuentaOutPort.guardar(existente));
     }
 
     @Override
     public void eliminar(Long id) {
-        Cliente existente = buscarCliente(id);
-        clienteOutPort.eliminar(existente);
+        Cuenta existente = buscarCuenta(id);
+        cuentaOutPort.eliminar(existente);
     }
 
     // ------------------------------------------------------------------
     // Reglas de negocio privadas
     // ------------------------------------------------------------------
 
-    private Cliente buscarCliente(Long id) {
-        return clienteOutPort.buscarPorId(id)
-                .orElseThrow(() -> new ClienteNoEncontradoException(
-                        "No existe un cliente con el id: " + id));
+    private Cuenta buscarCuenta(Long id) {
+        return cuentaOutPort.buscarPorId(id)
+                .orElseThrow(() -> new CuentaNoEncontradoException(
+                        "No existe una cuenta con el id: " + id));
     }
 
-    private void validarEmailDisponible(String email, Long idActual) {
-        Optional<Cliente> porEmail = clienteOutPort.buscarPorEmail(normalizarEmail(email));
-        boolean esOtroCliente = porEmail.isPresent()
-                && (idActual == null || !porEmail.get().getId().equals(idActual));
-        if (esOtroCliente) {
-            throw new EmailDuplicadoException("Ya existe un cliente con el email: " + email);
+    private void validarNumeroCuentaDisponible(String numeroCuenta, Long idActual) {
+        Optional<Cuenta> porNumero = cuentaOutPort.buscarPorNumeroCuenta(numeroCuenta.trim());
+        boolean esOtraCuenta = porNumero.isPresent()
+                && (idActual == null || !porNumero.get().getId().equals(idActual));
+        if (esOtraCuenta) {
+            throw new NumeroCuentaDuplicadoException(
+                    "Ya existe una cuenta con el numero: " + numeroCuenta);
         }
     }
 
-    private String normalizarEmail(String email) {
-        return email == null ? null : email.trim().toLowerCase();
+    /** Default de negocio: si el DTO no trae estado, la cuenta queda INACTIVO. */
+    private EstadoCuenta resolverEstado(EstadoCuenta estado) {
+        return estado != null ? estado : EstadoCuenta.INACTIVO;
     }
 
-    private Cliente.Estado parseEstado(String estado) {
+    /** Convierte el estado en texto (path) al enum del dominio (400 si es invalido). */
+    private EstadoCuenta parseEstado(String estado) {
         if (estado == null || estado.isBlank()) {
-            return Cliente.Estado.ACTIVO; // default de negocio
+            return EstadoCuenta.INACTIVO; // default de negocio
         }
         try {
-            return Cliente.Estado.valueOf(estado.trim().toUpperCase());
+            return EstadoCuenta.valueOf(estado.trim().toUpperCase());
         } catch (IllegalArgumentException ex) {
             throw new IllegalArgumentException(
                     "Estado invalido: '" + estado + "'. Valores permitidos: ACTIVO, INACTIVO");
@@ -118,15 +119,14 @@ public class CuentaService implements CuentaUseCase {
     }
 
     /** Convierte el modelo de dominio a DTO de salida (nunca se expone la entidad). */
-    private ClienteDtoResponse aResponse(Cliente cliente) {
-        ClienteDtoResponse r = new ClienteDtoResponse();
-        r.setId(cliente.getId());
-        r.setNombre(cliente.getNombre());
-        r.setApellido(cliente.getApellido());
-        r.setEmail(cliente.getEmail());
-        r.setTelefono(cliente.getTelefono());
-        r.setEstado(cliente.getEstado() != null ? cliente.getEstado().name() : Cliente.Estado.ACTIVO.name());
-        r.setFechaInscripcion(cliente.getFechaInscripcion());
+    private CuentaDtoResponse aResponse(Cuenta cuenta) {
+        CuentaDtoResponse r = new CuentaDtoResponse();
+        r.setId(cuenta.getId());
+        r.setNumeroCuenta(cuenta.getNumeroCuenta());
+        r.setClienteId(cuenta.getClienteId());
+        r.setSaldo(cuenta.getSaldo());
+        r.setMoneda(cuenta.getMoneda());
+        r.setEstado(cuenta.getEstado() != null ? cuenta.getEstado() : EstadoCuenta.INACTIVO);
         return r;
     }
 }

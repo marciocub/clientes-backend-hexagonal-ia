@@ -2,7 +2,9 @@ package com.escuela.infrastructure.in;
 
 import com.escuela.domain.exception.ClienteNoEncontradoException;
 import com.escuela.domain.exception.CredencialesInvalidasException;
+import com.escuela.domain.exception.CuentaNoEncontradoException;
 import com.escuela.domain.exception.EmailDuplicadoException;
+import com.escuela.domain.exception.NumeroCuentaDuplicadoException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -20,7 +22,9 @@ import java.util.stream.Collectors;
  * - MethodArgumentNotValidException -&gt; 400 Bad Request
  * - CredencialesInvalidasException   -&gt; 401 Unauthorized
  * - ClienteNoEncontradoException      -&gt; 404 Not Found
- * - EmailDuplicadoException          -&gt; 409 Conflict
+ * - CuentaNoEncontradoException       -&gt; 404 Not Found
+ * - EmailDuplicadoException           -&gt; 409 Conflict
+ * - NumeroCuentaDuplicadoException    -&gt; 409 Conflict
  * - IllegalArgumentException         -&gt; 400 Bad Request (ej. estado invalido)
  */
 @RestControllerAdvice
@@ -68,6 +72,18 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(EmailDuplicadoException.class)
     public ResponseEntity<ErrorRespuesta> manejarEmailDuplicado(EmailDuplicadoException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new ErrorRespuesta(409, "Conflict", ex.getMessage(), LocalDateTime.now()));
+    }
+
+    @ExceptionHandler(CuentaNoEncontradoException.class)
+    public ResponseEntity<ErrorRespuesta> manejarCuentaNoEncontrado(CuentaNoEncontradoException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ErrorRespuesta(404, "Not Found", ex.getMessage(), LocalDateTime.now()));
+    }
+
+    @ExceptionHandler(NumeroCuentaDuplicadoException.class)
+    public ResponseEntity<ErrorRespuesta> manejarNumeroCuentaDuplicado(NumeroCuentaDuplicadoException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(new ErrorRespuesta(409, "Conflict", ex.getMessage(), LocalDateTime.now()));
     }

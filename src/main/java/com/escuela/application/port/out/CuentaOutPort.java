@@ -1,7 +1,5 @@
 package com.escuela.application.port.out;
 
-
-
 import java.util.List;
 import java.util.Optional;
 
@@ -9,27 +7,27 @@ import com.escuela.domain.Enum.EstadoCuenta;
 import com.escuela.domain.model.Cuenta;
 
 /**
- * Puerto de SALIDA: contrato de persistencia de Cuentas.
+ * Puerto de SALIDA: contrato de persistencia de cuentas.
  * Se expresa en terminos del MODELO DE DOMINIO (Cuenta), nunca de JPA.
  * Lo implementa el adaptador de base de datos (infrastructure/out/db/CuentaAdapter).
  */
 public interface CuentaOutPort {
 
-    /** Guarda un Cuenta nuevo o actualiza uno existente. */
+    /** Guarda una cuenta nueva o actualiza una existente. */
     Cuenta guardar(Cuenta cuenta);
 
-    /** Busca un Cuenta por id. */
+    /** Busca una cuenta por id. */
     Optional<Cuenta> buscarPorId(Long id);
 
-    /** Busca un Cuenta por email (unico). */
-    Optional<Cuenta> buscarPorEmail(String email);
+    /** Busca una cuenta por numero de cuenta (unico). */
+    Optional<Cuenta> buscarPorNumeroCuenta(String numeroCuenta);
 
-    /** Lista todos los Cuentas. */
+    /** Lista todas las cuentas. */
     List<Cuenta> listarTodos();
 
-    /** Lista Cuentas por estado. */
+    /** Lista cuentas por estado. */
     List<Cuenta> listarPorEstado(EstadoCuenta estado);
 
-    /** Elimina un Cuenta. */
+    /** Elimina una cuenta. */
     void eliminar(Cuenta cuenta);
 }

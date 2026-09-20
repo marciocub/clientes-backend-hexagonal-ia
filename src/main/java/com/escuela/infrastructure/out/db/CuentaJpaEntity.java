@@ -8,40 +8,39 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
-import java.time.LocalDateTime;
+import java.math.BigDecimal;
 
 /**
- * Unica clase de cliente con anotaciones JPA (adaptador de salida a BD).
- * El modelo de dominio (domain/model/Cliente) permanece puro.
- * Tabla: clientes (email unico).
+ * Unica clase de cuenta con anotaciones JPA (adaptador de salida a BD).
+ * El modelo de dominio (domain/model/Cuenta) permanece puro.
+ * Tabla: cuentas (numero_cuenta unico).
  */
 @Entity
-@Table(name = "clientes",
-        uniqueConstraints = @UniqueConstraint(name = "uk_cliente_email", columnNames = "email"))
+@Table(name = "cuentas",
+        uniqueConstraints = @UniqueConstraint(name = "uk_cuenta_numero", columnNames = "numero_cuenta"))
 public class CuentaJpaEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "nombre", nullable = false, length = 100)
-    private String nombre;
+    @Column(name = "numero_cuenta", nullable = false, length = 30)
+    private String numeroCuenta;
 
-    @Column(name = "apellido", nullable = false, length = 100)
-    private String apellido;
+    /** Cliente duenio de la cuenta (FK logica por id simple). */
+    @Column(name = "cliente_id", nullable = false)
+    private Long clienteId;
 
-    @Column(name = "email", nullable = false, length = 100)
-    private String email;
+    @Column(name = "saldo", nullable = false, precision = 15, scale = 2)
+    private BigDecimal saldo;
 
-    @Column(name = "telefono", length = 20)
-    private String telefono;
+    /** PESOS / DOLAR / EURO / REAL (string en la tabla, enum Moneda en el dominio). */
+    @Column(name = "moneda", nullable = false, length = 10)
+    private String moneda;
 
-    /** ACTIVO / INACTIVO (string en la tabla, enum en el dominio). */
+    /** ACTIVO / INACTIVO (string en la tabla, enum EstadoCuenta en el dominio). */
     @Column(name = "estado", nullable = false, length = 20)
     private String estado;
-
-    @Column(name = "fecha_inscripcion", nullable = false)
-    private LocalDateTime fechaInscripcion;
 
     public CuentaJpaEntity() {
     }
@@ -54,36 +53,36 @@ public class CuentaJpaEntity {
         this.id = id;
     }
 
-    public String getNombre() {
-        return nombre;
+    public String getNumeroCuenta() {
+        return numeroCuenta;
     }
 
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
+    public void setNumeroCuenta(String numeroCuenta) {
+        this.numeroCuenta = numeroCuenta;
     }
 
-    public String getApellido() {
-        return apellido;
+    public Long getClienteId() {
+        return clienteId;
     }
 
-    public void setApellido(String apellido) {
-        this.apellido = apellido;
+    public void setClienteId(Long clienteId) {
+        this.clienteId = clienteId;
     }
 
-    public String getEmail() {
-        return email;
+    public BigDecimal getSaldo() {
+        return saldo;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setSaldo(BigDecimal saldo) {
+        this.saldo = saldo;
     }
 
-    public String getTelefono() {
-        return telefono;
+    public String getMoneda() {
+        return moneda;
     }
 
-    public void setTelefono(String telefono) {
-        this.telefono = telefono;
+    public void setMoneda(String moneda) {
+        this.moneda = moneda;
     }
 
     public String getEstado() {
@@ -92,13 +91,5 @@ public class CuentaJpaEntity {
 
     public void setEstado(String estado) {
         this.estado = estado;
-    }
-
-    public LocalDateTime getFechaInscripcion() {
-        return fechaInscripcion;
-    }
-
-    public void setFechaInscripcion(LocalDateTime fechaInscripcion) {
-        this.fechaInscripcion = fechaInscripcion;
     }
 }

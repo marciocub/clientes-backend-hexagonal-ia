@@ -1,59 +1,60 @@
 package com.escuela.infrastructure.out.db;
 
-import com.escuela.application.port.out.ClienteOutPort;
-import com.escuela.domain.model.Cliente;
-import com.escuela.infrastructure.mapper.ClienteJpaMapper;
+import com.escuela.application.port.out.CuentaOutPort;
+import com.escuela.domain.Enum.EstadoCuenta;
+import com.escuela.domain.model.Cuenta;
+import com.escuela.infrastructure.mapper.CuentaJpaMapper;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
 /**
- * Adaptador de salida a base de datos: implementa ClienteOutPort.
- * Delega en el ClienteRepository (Spring Data JPA) y usa el mapper
+ * Adaptador de salida a base de datos: implementa CuentaOutPort.
+ * Delega en el CuentaRepository (Spring Data JPA) y usa el mapper
  * para convertir entre dominio y JPA.
  */
 @Repository
-public class CuentaAdapter implements ClienteOutPort {
+public class CuentaAdapter implements CuentaOutPort {
 
-    private final ClienteRepository clienteRepository;
+    private final CuentaRepository cuentaRepository;
 
-    public CuentaAdapter(ClienteRepository clienteRepository) {
-        this.clienteRepository = clienteRepository;
+    public CuentaAdapter(CuentaRepository cuentaRepository) {
+        this.cuentaRepository = cuentaRepository;
     }
 
     @Override
-    public Cliente guardar(Cliente cliente) {
-        ClienteJpaEntity guardada = clienteRepository.save(ClienteJpaMapper.aEntity(cliente));
-        return ClienteJpaMapper.aDominio(guardada);
+    public Cuenta guardar(Cuenta cuenta) {
+        CuentaJpaEntity guardada = cuentaRepository.save(CuentaJpaMapper.aEntity(cuenta));
+        return CuentaJpaMapper.aDominio(guardada);
     }
 
     @Override
-    public Optional<Cliente> buscarPorId(Long id) {
-        return clienteRepository.findById(id).map(ClienteJpaMapper::aDominio);
+    public Optional<Cuenta> buscarPorId(Long id) {
+        return cuentaRepository.findById(id).map(CuentaJpaMapper::aDominio);
     }
 
     @Override
-    public Optional<Cliente> buscarPorEmail(String email) {
-        return clienteRepository.findByEmail(email).map(ClienteJpaMapper::aDominio);
+    public Optional<Cuenta> buscarPorNumeroCuenta(String numeroCuenta) {
+        return cuentaRepository.findByNumeroCuenta(numeroCuenta).map(CuentaJpaMapper::aDominio);
     }
 
     @Override
-    public List<Cliente> listarTodos() {
-        return clienteRepository.findAll().stream()
-                .map(ClienteJpaMapper::aDominio)
+    public List<Cuenta> listarTodos() {
+        return cuentaRepository.findAll().stream()
+                .map(CuentaJpaMapper::aDominio)
                 .toList();
     }
 
     @Override
-    public List<Cliente> listarPorEstado(Cliente.Estado estado) {
-        return clienteRepository.findByEstado(estado.name()).stream()
-                .map(ClienteJpaMapper::aDominio)
+    public List<Cuenta> listarPorEstado(EstadoCuenta estado) {
+        return cuentaRepository.findByEstado(estado.name()).stream()
+                .map(CuentaJpaMapper::aDominio)
                 .toList();
     }
 
     @Override
-    public void eliminar(Cliente cliente) {
-        clienteRepository.deleteById(cliente.getId());
+    public void eliminar(Cuenta cuenta) {
+        cuentaRepository.deleteById(cuenta.getId());
     }
 }

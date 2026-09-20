@@ -6,12 +6,12 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Spring Data JPA para clientes (detalle de infraestructura).
- * Solo lo usa ClienteAdapter, nunca la capa de aplicacion.
+ * Spring Data JPA para cuentas (detalle de infraestructura).
+ * Solo lo usa CuentaAdapter, nunca la capa de aplicacion.
  */
-public interface CuentaRepository extends JpaRepository<ClienteJpaEntity, Long> {
+public interface CuentaRepository extends JpaRepository<CuentaJpaEntity, Long> {
 
-    Optional<ClienteJpaEntity> findByEmail(String email);
+    Optional<CuentaJpaEntity> findByNumeroCuenta(String numeroCuenta);
 
-    List<ClienteJpaEntity> findByEstado(String estado);
+    List<CuentaJpaEntity> findByEstado(String estado);
 }
