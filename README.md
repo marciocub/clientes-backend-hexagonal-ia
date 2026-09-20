@@ -1,10 +1,10 @@
 # clientes-backend-hexagonal-ia
 
-Backend para un **ABM de Clientes con autenticación JWT** implementando **Arquitectura Hexagonal (Puertos y Adaptadores)**.
+Backend para un **ABM de Clientes (agregado: tarjetas de crédito y facturas con items) y de Cuentas**, con autenticación JWT, implementando **Arquitectura Hexagonal (Puertos y Adaptadores)**.
 
 - **Java 21** · **Spring Boot 4.1.1** · **Spring Security** · **JJWT 0.13.0** · **Spring Data JPA** · **MySQL 8 (Docker)**
 - Todo el código, comentarios y mensajes están en español.
-- Paquete base: `com.escuela`.
+- Paquete base: `com.banco`.
 
 ---
 
@@ -101,7 +101,7 @@ Cliente (React) ──► GET /api/clientes
 | Subject | email del usuario |
 | Contraseñas | BCrypt (`BCryptPasswordAdapter`); jamás en texto plano ni en respuestas |
 | Rutas públicas | `POST /api/usuarios/registro`, `POST /api/usuarios/login`, `GET /api/usuarios/ping` |
-| Rutas protegidas | `/api/clientes/**` y el resto → `authenticated()` |
+| Rutas protegidas | `/api/clientes/**`, `/api/cuentas/**` y el resto → `authenticated()` |
 | Sin token en ruta protegida | **403** (entry point por defecto de Spring Security) |
 | Token inválido/expirado | **401** (lo resuelve `JwtAuthenticationFilter`) |
 | Sesiones | `STATELESS`, CSRF deshabilitado |
@@ -116,19 +116,44 @@ Cliente (React) ──► GET /api/clientes
 | POST | `/api/usuarios/registro` | Pública | Registra usuario, devuelve token JWT (201) |
 | POST | `/api/usuarios/login` | Pública | Autentica, devuelve token JWT (200) |
 | GET | `/api/usuarios/ping` | Pública | Health check → `"pong"` |
-| GET | `/api/clientes` | JWT | Lista todos los clientes |
-| GET | `/api/clientes/{id}` | JWT | Cliente por id (404 si no existe) |
-| GET | `/api/clientes/estado/{estado}` | JWT | Filtra por ACTIVO/INACTIVO |
-| POST | `/api/clientes` | JWT | Crea cliente (201; 400 validaciones; 409 email duplicado) |
-| PUT | `/api/clientes/{id}` | JWT | Actualiza cliente (404 si no existe / 409 email duplicado) |
-| DELETE | `/api/clientes/{id}` | JWT | Elimina cliente (204) |
+| GET | `/api/clientes` | JWT | Lista todos los clientes con su agregado completo (tarjetas + facturas) |
+| GET | `/api/clientes/{id}` | JWT | Cliente por id con tarjetas y facturas (404 si no existe) |
+| POST | `/api/clientes` | JWT | Crea cliente (201; 400 validaciones) |
+| PUT | `/api/clientes/{id}` | JWT | Actualiza nombre/cuit conservando el agregado (404 si no existe) |
+| DELETE | `/api/clientes/{id}` | JWT | Elimina el cliente y su agregado en cascada (204) |
+| POST | `/api/clientes/{id}/tarjetas` | JWT | Solicita tarjeta (201; **409 si el límite acumulado supera los $ 2.000.000**) |
+| POST | `/api/clientes/{id}/facturas` | JWT | Emite factura con items; el monto total lo calcula el dominio (201; 400 si no hay items) |
+| GET | `/api/cuentas` | JWT | Lista todas las cuentas |
+| GET | `/api/cuentas/{id}` | JWT | Cuenta por id (404 si no existe) |
+| GET | `/api/cuentas/estado/{estado}` | JWT | Filtra por ACTIVO/INACTIVO (400 si el estado es inválido) |
+| POST | `/api/cuentas` | JWT | Crea cuenta (201; 400 validaciones; 409 número de cuenta duplicado) |
+| PUT | `/api/cuentas/{id}` | JWT | Actualiza cuenta (404 si no existe; 409 número duplicado) |
+| DELETE | `/api/cuentas/{id}` | JWT | Elimina cuenta (204) |
+
+### Ejemplos rápidos del agregado
+
+```powershell
+# Alta de cliente
+$cli = Invoke-RestMethod -Method Post -Uri http://localhost:8080/api/clientes -Headers $h `
+  -ContentType 'application/json' -Body '{"nombre":"Acme SA","cuit":"20-12345678-9"}'
+
+# Solicitar tarjeta (409 si el acumulado supera el tope de 2.000.000)
+Invoke-RestMethod -Method Post -Uri "http://localhost:8080/api/clientes/$($cli.id)/tarjetas" -Headers $h `
+  -ContentType 'application/json' -Body '{"marca":"VISA","limiteSolicitado":1500000,"ultimoCuatro":"4321"}'
+
+# Emitir factura con items (montoTotal lo calcula el dominio: 2 x 1000,50 + 1 x 500 = 2501,00)
+Invoke-RestMethod -Method Post -Uri "http://localhost:8080/api/clientes/$($cli.id)/facturas" -Headers $h `
+  -ContentType 'application/json' -Body '{"numeroFactura":"F-0001-00000001","items":[{"descripcion":"Servicio A","cantidad":2,"precioUnitario":1000.50},{"descripcion":"Servicio B","cantidad":1,"precioUnitario":500}]}'
+```
+
 
 ---
 
 ## 5. Base de datos (Docker)
 
 Contenedor: `mysql-app-clientes-hexagonal` · puerto host **3309** → 3306 · BD: `clientes_hexago_db` · root/root.
-Las tablas `clientes` y `usuarios` se crean al arrancar el backend (`spring.jpa.hibernate.ddl-auto=update`).
+Las tablas se crean al arrancar el backend (`spring.jpa.hibernate.ddl-auto=update`):
+`clientes`, `tarjetas_credito`, `facturas`, `factura_items`, `cuentas`, `usuarios`.
 
 ```powershell
 # Crear el contenedor (si no existe)
@@ -180,8 +205,18 @@ curl.exe -s -X POST -H "Content-Type: application/json" `
 # Listado con token -> 200
 curl.exe -s -H "Authorization: Bearer <TOKEN>" http://localhost:8080/api/clientes
 
+# Agregar tarjeta a un cliente (409 si el acumulado supera 2.000.000)
+curl.exe -s -X POST -H "Content-Type: application/json" -H "Authorization: Bearer <TOKEN>" ^
+  -d "{\"marca\":\"VISA\",\"limiteSolicitado\":1500000,\"ultimoCuatro\":\"4321\"}" ^
+  http://localhost:8080/api/clientes/1/tarjetas
+
+# Emitir factura con items (el total lo calcula el dominio)
+curl.exe -s -X POST -H "Content-Type: application/json" -H "Authorization: Bearer <TOKEN>" ^
+  -d "{\"numeroFactura\":\"F-0001-00000001\",\"items\":[{\"descripcion\":\"Servicio A\",\"cantidad\":2,\"precioUnitario\":1000.50}]}" ^
+  http://localhost:8080/api/clientes/1/facturas
+
 # Login con contraseña incorrecta -> 401
-# Registro duplicado -> 409 · Cliente inexistente -> 404 · DELETE -> 204
+# Registro duplicado -> 409 · Cliente/Cuenta inexistente -> 404 · DELETE -> 204
 ```
 
 ---
@@ -189,23 +224,51 @@ curl.exe -s -H "Authorization: Bearer <TOKEN>" http://localhost:8080/api/cliente
 ## 8. Estructura de archivos
 
 ```
-src/main/java/com/escuela/
+src/main/java/com/banco/
 ├── ClientesHexagonalApplication.java   (arranque; única clase fuera de las 3 capas)
 ├── domain/                            (núcleo de negocio, Java puro)
-│   ├── model/     Cliente, Usuario, Rol
-│   └── exception/ EmailDuplicadoException, ClienteNoEncontradoException,
-│                  CredencialesInvalidasException
+│   ├── model/     Cliente (AGGREGATE ROOT), TarjetaCredito, Factura, ItemFactura,
+│   │              Cuenta, Usuario, Rol
+│   ├── Enum/      Moneda, EstadoCuenta
+│   └── exception/ ClienteNoEncontradoException, LimiteTarjetasExcedidoException,
+│                  ConsumoExcedeDisponibleException, FacturaYaPagadaException,
+│                  CuentaNoEncontradoException, NumeroCuentaDuplicadoException,
+│                  EmailDuplicadoException, CredencialesInvalidasException
 ├── application/                       (casos de uso)
-│   ├── dto/       ClienteDTO, ClienteDtoResponse, LoginRequest, RegistroRequest, LoginResponse
-│   ├── port/in/   ClienteUseCase, AuthUseCase
-│   ├── port/out/  ClienteOutPort, UsuarioOutPort, PasswordEncoderPort, TokenProviderPort
-│   └── service/   ClienteService, AuthService
+│   ├── dto/       ClienteDTO, ClienteDtoResponse, SolicitarTarjetaDTO, CrearFacturaDTO,
+│   │              ItemFacturaDTO, TarjetaCreditoDtoResponse, FacturaDtoResponse,
+│   │              CuentaDTO, CuentaDtoResponse, LoginRequest, RegistroRequest, LoginResponse
+│   ├── port/in/   ClienteUseCase, CuentaUseCase, AuthUseCase
+│   ├── port/out/  ClienteOutPort, CuentaOutPort, UsuarioOutPort,
+│   │              PasswordEncoderPort, TokenProviderPort
+│   └── service/   ClienteService, CuentaService, AuthService
 └── infrastructure/                    (adaptadores)
-    ├── in/        ClienteController, UsuarioController, GlobalExceptionHandler
-    ├── mapper/    ClienteJpaMapper, UsuarioJpaMapper
+    ├── in/        ClienteController, CuentaController, UsuarioController,
+    │              GlobalExceptionHandler
+    ├── mapper/    ClienteJpaMapper, CuentaJpaMapper, UsuarioJpaMapper
     ├── security/  JwtTokenAdapter, BCryptPasswordAdapter, JwtAuthenticationFilter, SecurityConfig
-    └── out/db/    ClienteJpaEntity, ClienteRepository, ClienteAdapter,
+    └── out/db/    ClienteJpaEntity, TarjetaCreditoJpaEntity, FacturaJpaEntity,
+                    ItemFacturaJpaEntity, ClienteRepository, ClienteAdapter,
+                    CuentaJpaEntity, CuentaRepository, CuentaAdapter,
                     UsuarioJpaEntity, UsuarioRepository, UsuarioAdapter
 ```
+
+### Agregado `Cliente` (modelo de dominio)
+
+```
+Cliente (AGGREGATE ROOT)  id · nombre · cuit
+ ├── tarjetas  List<TarjetaCredito>   id · numeroMascara · marca · limiteCredito ·
+ │                                   saldoUtilizado · fechaVencimiento · estado(ACTIVA|BLOQUEADA)
+ │                                   getCreditoDisponible() · registrarConsumo(monto)
+ └── facturas  List<Factura>          id · numeroFactura · fechaEmision · montoTotal ·
+                                     estado(PENDIENTE|PAGADA) · calcularTotal() · pagar()
+      └── items  List<ItemFactura>   id · descripcion · cantidad · precioUnitario · subtotal
+
+Reglas de negocio EN EL DOMINIO:
+ · solicitarTarjeta(marca, limiteSolicitado, ultimoCuatro) → el límite acumulado de todas
+   las tarjetas no puede superar el TOPE de $ 2.000.000 (si lo supera: LimiteTarjetasExcedido → 409).
+ · emitirFactura(numeroFactura, items) → calcula montoTotal sumando los items y la agrega.
+```
+
 
 

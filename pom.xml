@@ -11,11 +11,11 @@
         <relativePath/>
     </parent>
 
-    <groupId>com.escuela</groupId>
+    <groupId>com.banco</groupId>
     <artifactId>clientes-hexagonal</artifactId>
     <version>1.0.0</version>
     <name>clientes-hexagonal</name>
-    <description>Backend ABM de Clientes con autenticacion JWT y Arquitectura Hexagonal (Puertos y Adaptadores)</description>
+    <description>Backend ABM de Clientes (agregado con tarjetas y facturas) y Cuentas con autenticacion JWT y Arquitectura Hexagonal (Puertos y Adaptadores)</description>
 
     <properties>
         <java.version>21</java.version>
